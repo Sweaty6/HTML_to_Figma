@@ -1,0 +1,20 @@
+{
+  "name": "html-to-fig-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Захват интерактивных состояний веб-сайта и экспорт в .fig",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "openfig-core": "0.4.1",
+    "playwright": "^1.55.0",
+    "pngjs": "7.0.0",
+    "zstd-codec": "^0.1.5"
+  }
+}

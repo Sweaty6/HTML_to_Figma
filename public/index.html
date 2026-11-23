@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Снимайте состояния сайта и экспортируйте их в редактируемый файл Figma.">
+  <title>HTML → FIG Studio</title>
+  <link rel="stylesheet" href="./studio.css">
+  <script type="module" src="./studio.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <header class="header">
+      <a class="brand" href="./"><span class="mark" aria-hidden="true"><span class="arrow"></span></span><span>HTML → FIG <span class="accent">Studio</span></span></a>
+      <button id="workerStatus" class="connection" type="button"><span class="dot" aria-hidden="true"></span><span id="workerLabel">Подключить Chromium</span></button>
+    </header>
+
+    <section class="hero" aria-labelledby="studioTitle">
+      <h1 id="studioTitle">Перенесите сайт<br>в <span class="accent">Figma-слои.</span></h1>
+      <p>Обходчик откроет страницы и интерактивные состояния, дождётся анимаций и соберёт их в один файл <code>.fig</code>.</p>
+    </section>
+
+    <main class="workspace">
+      <section class="panel" aria-labelledby="sourceTitle">
+        <div class="panel-head">
+          <h2 id="sourceTitle">Настройка захвата</h2>
+          <button id="demo" class="button subtle" type="button">Загрузить демо</button>
+        </div>
+        <form id="source" class="panel-body">
+          <div class="segment" role="group" aria-label="Источник">
+            <button id="tabUrl" aria-pressed="true" type="button">Ссылка на сайт</button>
+            <button id="tabHtml" aria-pressed="false" type="button">HTML-код</button>
+          </div>
+
+          <div class="field" id="urlbox">
+            <label for="url">Адрес страницы</label>
+            <input id="url" name="url" type="url" placeholder="https://example.com" autocomplete="url" spellcheck="false" required>
+          </div>
+
+          <div class="field" id="htmlbox" hidden>
+            <label for="html">Исходный HTML</label>
+            <textarea id="html" name="html" rows="6" placeholder="<!doctype html>…" spellcheck="false" disabled></textarea>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="viewport">Ширина экрана</label>
+              <select id="viewport" name="viewport">
+                <option value="1440">Desktop · 1440 px</option>
+                <option value="1920">Large desktop · 1920 px</option>
+                <option value="1024">Tablet · 1024 px</option>
+                <option value="390">Mobile · 390 px</option>
+                <option value="375">Mobile · 375 px</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="limit">Слоёв на состояние</label>
+              <select id="limit" name="limit">
+                <option value="450">До 450</option>
+                <option value="750" selected>До 750</option>
+                <option value="1250">До 1250</option>
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="exploration">
+            <legend>Обход интерфейса</legend>
+            <label class="check">
+              <input id="explore" type="checkbox" aria-describedby="exploreHint">
+              <span>Открывать ссылки и нажимать элементы интерфейса</span>
+            </label>
+            <p id="exploreHint" class="hint">Включайте обход для сайтов, которые вы вправе автоматически проверять. Обходчик исключает отправку форм и фильтрует элементы, похожие на оплату или изменение данных.</p>
+            <div class="row exploration-options">
+              <div class="field">
+                <label for="maxStates">Максимум состояний</label>
+                <input id="maxStates" type="number" min="2" max="20" value="8" inputmode="numeric" disabled>
+              </div>
+              <div class="field">
+                <label for="delay">Задержка после клика, мс</label>
+                <input id="delay" type="number" min="0" max="5000" value="850" inputmode="numeric" disabled>
+              </div>
+            </div>
+            <div id="aiSettings" hidden>
+              <label class="check">
+                <input id="aiAssist" type="checkbox" aria-describedby="aiHint" disabled>
+                <span>Подключить ИИ для выбора порядка действий</span>
+              </label>
+              <p id="aiHint" class="hint">Названия видимых элементов будут отправлены в модель, настроенную на сервере обработки.</p>
+            </div>
+          </fieldset>
+
+          <label class="check reference">
+            <input id="reference" type="checkbox" checked>
+            <span>Добавить отдельные фреймы с эталонными снимками Chromium</span>
+          </label>
+
+          <details id="settings" class="settings">
+            <summary>Сервер обработки</summary>
+            <div class="settings-content">
+              <p id="connectionHint" class="hint">Chromium запускается на сервере обработки. Используйте локальный запуск Studio или подключите свой HTTPS-сервер.</p>
+              <div class="field">
+                <label for="worker">Адрес сервера</label>
+                <input id="worker" type="text" inputmode="url" autocomplete="off" spellcheck="false">
+              </div>
+              <div class="field">
+                <label for="token">Токен сервера <span class="secondary">(если задан)</span></label>
+                <input id="token" type="password" autocomplete="off" spellcheck="false">
+              </div>
+              <button id="checkWorker" class="button subtle" type="button">Проверить подключение</button>
+              <p id="connectionStatus" class="hint" role="status"></p>
+            </div>
+          </details>
+
+          <button id="convert" class="button primary" type="submit"><span id="btnIcon" class="arrow" aria-hidden="true"></span><span id="btnText">Собрать .fig</span></button>
+        </form>
+      </section>
+
+      <section class="panel results" aria-labelledby="resultTitle">
+        <div class="panel-head">
+          <h2 id="resultTitle">Результат захвата</h2>
+          <span id="stateNumber" class="secondary"></span>
+        </div>
+        <div class="panel-body">
+          <div id="preview" class="preview" aria-busy="false">
+            <div id="empty" class="placeholder">
+              <span class="preview-icon" aria-hidden="true"><span></span></span>
+              <span id="emptyText">Здесь появится снимок браузера</span>
+            </div>
+            <img id="image" alt="" hidden>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite">Укажите ссылку или загрузите демо.</p>
+
+          <div id="resultBody" hidden>
+            <div class="stats">
+              <div class="stat"><span>Состояний</span><strong id="statesCount">—</strong></div>
+              <div class="stat"><span>Объектов</span><strong id="nodes">—</strong></div>
+              <div class="stat"><span>Изображений</span><strong id="assets">—</strong></div>
+            </div>
+
+            <h3>Состояния сайта</h3>
+            <ul id="states" class="states" aria-label="Захваченные состояния"></ul>
+            <p id="stateInfo" class="hint state-info"></p>
+            <details id="diagnostics" class="settings" hidden>
+              <summary>Отчёт обходчика</summary>
+              <ul id="report" class="report"></ul>
+            </details>
+          </div>
+
+          <div class="downloads">
+            <button id="fig" class="button download fig-download" type="button" disabled>Скачать .fig <span aria-hidden="true">↓</span></button>
+            <button id="png" class="button download" type="button" disabled>Снимок PNG <span aria-hidden="true">↓</span></button>
+            <button id="json" class="button download" type="button" disabled>Данные JSON <span aria-hidden="true">↓</span></button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>Редактируемые слои могут отличаться от снимка Chromium при сложных эффектах, нестандартных шрифтах или содержимом внутри отдельных фреймов.</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit · интерактивный пример</title>
+<style>
+:root { font: 17px/1.55 system-ui, sans-serif; color: #17352a; background: #eef9f0; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 28px clamp(18px, 7vw, 104px) 48px; background: #eef9f0; }
+header, .tabs { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+header { justify-content: space-between; border-bottom: 1px solid #b6cfbf; padding-bottom: 18px; }
+.brand { font-size: 25px; font-weight: 800; }
+main { max-width: 870px; margin: 56px auto 0; }
+h1 { font-size: clamp(42px, 7vw, 80px); line-height: .98; letter-spacing: -.05em; margin: 0 0 22px; }
+main > p { max-width: 46ch; margin-bottom: 32px; }
+button { font: inherit; color: #17352a; padding: 9px 17px; border-radius: 30px; border: 1px solid #719782; background: #fff; cursor: pointer; }
+button[aria-selected=true], #demo { background: #25583e; color: #fff; border-color: #25583e; }
+nav { position: relative; }
+nav ul { position: absolute; right: 0; width: 175px; z-index: 1; list-style: none; margin: 8px 0 0; padding: 10px 16px; border-radius: 14px; background: #fff; box-shadow: 0 7px 22px #17352a25; }
+a { color: #25583e; }
+article { margin: 14px 0 0; padding: 21px 26px; border: 1px solid #b6cfbf; border-radius: 18px; background: #fff; }
+h2 { margin: 0 0 7px; font-size: 25px; }
+article p { margin: 0 0 12px; }
+dialog { max-width: min(440px, 90vw); color: #17352a; border: 0; border-radius: 22px; padding: 30px; }
+dialog::backdrop { background: #12322299; }
+.enter { animation: enter 320ms ease-out both; }
+@keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Orbit</span>
+  <nav aria-label="Навигация">
+    <button id="menu" aria-expanded="false" aria-controls="links">Меню</button>
+    <ul id="links" hidden><li><a href="#features">Возможности</a></li><li><a href="#faq">Вопросы</a></li></ul>
+  </nav>
+</header>
+<main>
+  <h1>Вся команда<br>на одной орбите</h1>
+  <p>Планируйте проекты, назначайте задачи и следите за прогрессом команды в одном пространстве.</p>
+  <p><button id="demo">Открыть демо</button></p>
+  <section id="features" aria-label="Возможности">
+    <div class="tabs" role="tablist" aria-label="Режим работы">
+      <button id="plan" role="tab" aria-selected="true" aria-controls="plan-panel">Планирование</button>
+      <button id="team" role="tab" aria-selected="false" aria-controls="team-panel">Команда</button>
+    </div>
+    <article id="plan-panel" role="tabpanel" aria-labelledby="plan">
+      <h2>Планы на неделю</h2><p>Собирайте инициативы и планируйте работу по срокам.</p>
+    </article>
+    <article id="team-panel" role="tabpanel" aria-labelledby="team" hidden>
+      <h2>Командный обзор</h2><p>Просматривайте, что в работе у каждого участника.</p>
+      <details><summary>Роли участников</summary><p>Дизайн, исследование и разработка.</p></details>
+    </article>
+  </section>
+  <article id="faq"><details><summary>Как начать?</summary><p>Создайте проект и пригласите команду.</p></details></article>
+</main>
+<dialog id="modal" aria-labelledby="modal-title">
+  <h2 id="modal-title">Демо Orbit</h2>
+  <p>Это диалог для проверки обхода и захвата анимации.</p>
+  <button id="dismiss">Закрыть</button>
+</dialog>
+<script>
+const byId = id => document.getElementById(id);
+byId('menu').addEventListener('click', event => {
+  const links = byId('links');
+  links.hidden = !links.hidden;
+  links.classList.toggle('enter', !links.hidden);
+  event.currentTarget.setAttribute('aria-expanded', String(!links.hidden));
+});
+for (const id of ['plan', 'team']) {
+  byId(id).addEventListener('click', () => {
+    for (const tab of document.querySelectorAll('[role="tab"]')) {
+      const selected = tab.id === id;
+      tab.setAttribute('aria-selected', String(selected));
+      const panel = byId(tab.getAttribute('aria-controls'));
+      panel.hidden = !selected;
+      panel.classList.toggle('enter', selected);
+    }
+  });
+}
+byId('demo').addEventListener('click', () => {
+  byId('modal').classList.add('enter');
+  byId('modal').showModal();
+});
+byId('dismiss').addEventListener('click', () => byId('modal').close());
+</script>
+</body>
+</html>
